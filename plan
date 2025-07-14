@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plan de Martina Bani 🩷</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #ffe6f0;
+      color: #4a1c2e;
+      margin: 0;
+      padding: 2rem;
+    }
+    h1 {
+      text-align: center;
+      color: #d63384;
+      margin-bottom: 1.5rem;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+    }
+    .materia {
+      background-color: #fff0f5;
+      border: 2px solid #d63384;
+      border-radius: 12px;
+      padding: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .materia:hover {
+      background-color: #fcd2e9;
+    }
+    .materia.aprobada {
+      background-color: #ffd6e7;
+      text-decoration: line-through;
+      opacity: 0.6;
+    }
+    .materia.locked {
+      background-color: #f8e8f0;
+      border-style: dashed;
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+    .correlativas {
+      font-size: 0.9rem;
+      color: #a5486a;
+      margin-top: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Plan de Martina Bani 🩷</h1>
+  <div class="grid" id="materias"></div>
+  <script>
+    const materias = [
+      { nombre: "Psicología General", correlativas: [] },
+      { nombre: "Estadística", correlativas: [] },
+      { nombre: "Psicología Social", correlativas: [] },
+      { nombre: "Psicoanálisis: Freud", correlativas: [] },
+      { nombre: "Psicología y Epistemología Genética", correlativas: [] },
+      { nombre: "Neurofisiología", correlativas: [] },
+      { nombre: "Historia de la Psicología", correlativas: ["Psicología General"] },
+      { nombre: "Metodología de la Investigación", correlativas: ["Psicología General", "Estadística"] },
+      { nombre: "Salud Pública y Salud Mental", correlativas: ["Psicología Social", "Metodología de la Investigación"] },
+      { nombre: "Teorías y Técnicas de Grupos", correlativas: ["Psicología Social", "Psicoanálisis: Freud"] },
+      { nombre: "Psicología Evolutiva Niñez", correlativas: ["Psicoanálisis: Freud", "Psicología y Epistemología Genética"] },
+      { nombre: "Psicología Evolutiva Adolescencia", correlativas: ["Psicología Evolutiva Niñez"] },
+      { nombre: "Psicopatología", correlativas: ["Psicología Evolutiva Adolescencia", "Neurofisiología"] },
+      { nombre: "TTEyDP I", correlativas: ["Psicopatología"] },
+      { nombre: "TTEyDP II", correlativas: ["Psicopatología", "TTEyDP I"] },
+      { nombre: "Psicología, Ética y DDHH", correlativas: ["Psicología Social", "Historia de la Psicología"] },
+      { nombre: "Psicología Institucional", correlativas: ["Salud Pública y Salud Mental", "Teorías y Técnicas de Grupos"] },
+      { nombre: "Psicología Educacional", correlativas: ["Salud Pública y Salud Mental", "Teorías y Técnicas de Grupos", "Psicología Evolutiva Adolescencia"] },
+      { nombre: "Psicología del Trabajo", correlativas: ["Salud Pública y Salud Mental", "Teorías y Técnicas de Grupos", "TTEyDP II"] },
+      { nombre: "Clínica de Adultos", correlativas: ["Psicopatología", "TTEyDP I", "TTEyDP II"] },
+      { nombre: "Psicología Jurídica", correlativas: ["Psicopatología", "TTEyDP I", "TTEyDP II"] },
+      { nombre: "Clínica Psicopatías y Emergencias", correlativas: ["Psicopatología", "TTEyDP I", "TTEyDP II"] },
+      { nombre: "Práctica Profesional e Investigación", correlativas: ["Salud Pública y Salud Mental"] },
+    ];
+
+    const container = document.getElementById("materias");
+
+    function render() {
+      container.innerHTML = "";
+      const aprobadas = JSON.parse(localStorage.getItem("aprobadas") || "[]");
+      materias.forEach((m) => {
+        const isAprobada = aprobadas.includes(m.nombre);
+        const desbloqueada = m.correlativas.every((c) => aprobadas.includes(c));
+
+        const div = document.createElement("div");
+        div.className = "materia";
+        if (!desbloqueada && !isAprobada) div.classList.add("locked");
+        if (isAprobada) div.classList.add("aprobada");
+
+        div.innerHTML = `<strong>${m.nombre}</strong>`;
+        if (m.correlativas.length > 0) {
+          div.innerHTML += `<div class='correlativas'>Correlativas: ${m.correlativas.join(", ")}</div>`;
+        }
+
+        div.onclick = () => {
+          if (!desbloqueada && !isAprobada) return;
+          const nuevas = isAprobada
+            ? aprobadas.filter((x) => x !== m.nombre)
+            : [...aprobadas, m.nombre];
+          localStorage.setItem("aprobadas", JSON.stringify(nuevas));
+          render();
+        };
+
+        container.appendChild(div);
+      });
+    }
+
+    render();
+  </script>
+</body>
+</html>
